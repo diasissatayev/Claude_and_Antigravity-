@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""Report the status of the Antigravity agent stack on this machine — what's installed, what's
+missing, and how to get each piece. Zero agy calls, stdlib only. Used by `/agy:setup` and the
+bootstrap prompt (docs/SETUP_AGENT_STACK.md).
+
+Usage:  python stack_check.py
+"""
+import os, sys, shutil, importlib.util, json
+
+HOME = os.path.expanduser("~")
+AGY_SETTINGS = os.path.join(HOME, ".gemini", "antigravity-cli", "settings.json")
+
+
+def find_agy():
+    agy = os.environ.get("AGY_BIN") or shutil.which("agy") or shutil.which("agy.exe")
+    if not agy:
+        cand = os.path.join(HOME, "AppData", "Local", "agy", "bin", "agy.exe")
+        if os.path.isfile(cand):
+            agy = cand
+    return agy
+
+
+def has_module(name):
+    try:
+        return importlib.util.find_spec(name) is not None
+    except Exception:
+        return False
+
+
+GRAPHIFY_MIN = (0, 9, 31)       # keep in sync with graphify_install.py
+
+
+def graphify_ready():
+    """graphify installed at a version whose AST extraction needs no LLM and no API key.
+
+    Was `agy-cli backend present?` until v1.6.0 — that backend came from a source patch this plugin
+    applied to a clone of upstream, which upstream's v8 rewrite invalidated. Now we simply track the
+    official PyPI package."""
+    if not has_module("graphify"):
+        return False
+    try:
+        from importlib.metadata import version
+        parts = []
+        for seg in version("graphifyy").split("."):
+            digits = ""
+            for ch in seg:
+                if ch.isdigit():
+                    digits += ch
+                else:
+                    break
+            parts.append(int(digits) if digits else 0)
+        return tuple(parts[:3]) >= GRAPHIFY_MIN
+    except Exception:
+        return False
+
+
+def agy_tool_permission():
+    """Read ONLY the `toolPermission` field from agy's own global settings.json (read-only,
+    never printed as a dump — this file can hold other, unrelated entries). Returns the value
+    or None if the file/field is missing or unreadable. Never writes anything."""
+    try:
+        with open(AGY_SETTINGS, encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("toolPermission")
+    except Exception:
+        return None
+
+
+def main():
+    rows = []
+    # component, ok, requirement, purpose, how-to-fix
+    agy = find_agy()
+    rows.append(("agy CLI", bool(agy), "required",
+                 "the Gemini engine behind every /agy:* command",
+                 "install https://antigravity.google + run `agy` once to sign in" if not agy else (agy or "")))
+
+    rows.append(("PyMuPDF (fitz)", has_module("fitz"), "required for /agy:notebook PDFs",
+                 "read/extract PDF text in the notebook RAG",
+                 "pip install pymupdf"))
+
+    rows.append(("sqlite-vec", has_module("sqlite_vec"), "optional",
+                 "vector layer for /agy:notebook --semantic (hybrid search)",
+                 "pip install sqlite-vec  (also needs a real GEMINI_API_KEY for true embeddings)"))
+
+    ff = shutil.which("ffmpeg")
+    rows.append(("ffmpeg", bool(ff), "optional",
+                 "split long audio/video for /agy:transcribe",
+                 "install ffmpeg (https://ffmpeg.org) and put it on PATH"))
+
+    gready = graphify_ready()
+    rows.append(("graphify", gready, "optional (for /agy:graph)",
+                 "knowledge graphs: code graph built locally (0 tokens), communities named by agy",
+                 "run scripts/graphify_install.py (installs graphifyy from PyPI)"))
+
+    # render
+    width = max(len(r[0]) for r in rows)
+    print("Antigravity agent stack:")
+    n_req_missing = 0
+    for name, ok, req, purpose, fix in rows:
+        mark = "OK   " if ok else ("MISS " if "required" in req else "skip ")
+        if not ok and "required" in req:
+            n_req_missing += 1
+        print(f"  [{mark}] {name.ljust(width)}  {req}")
+        print(f"          {purpose}")
+        if not ok:
+            print(f"          -> {fix}")
+    print()
+    capdone = sum(1 for r in rows if r[1])
+    print(f"STACK {capdone}/{len(rows)} present" + (f" - {n_req_missing} REQUIRED missing" if n_req_missing else " - all required OK"))
+
+    perm = agy_tool_permission()
+    if perm == "always-proceed":
+        print()
+        print("Permisos de agy (global, fuera de este plugin):")
+        print(f"  [ATENCION] toolPermission = \"always-proceed\" en {AGY_SETTINGS}")
+        print("             agy aprueba TODAS las herramientas que pide, con o sin --dangerously-skip-permissions")
+        print("             (este plugin ya pasa ese flag para poder correr sin TTY; con always-proceed, la")
+        print("             aprobacion queda doble: ni el flag ni la config global piden confirmacion).")
+        print("             Este check solo lee el archivo, no lo toca. Para acotarlo: abri `agy` interactivo")
+        print("             y cambia Settings > Tool Permission a un modo que pida confirmacion (p.ej. \"ask\"")
+        print("             o el equivalente por-workspace), o edita ese campo a mano en el settings.json.")
+    elif perm is not None:
+        print()
+        print(f"Permisos de agy: toolPermission = \"{perm}\" (no es always-proceed, sin alerta).")
+
+    return 0 if n_req_missing == 0 else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

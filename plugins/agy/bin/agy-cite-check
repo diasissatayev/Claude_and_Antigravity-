@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# bin/ entrypoint: zero-network citation consistency check of a research report.
+HERE="$(cd "$(dirname "$0")/.." && pwd)"
+. "$HERE/scripts/lib/env.sh"
+exec "$AGY_PY" "$HERE/scripts/notebook/verify_citations.py" "$@"

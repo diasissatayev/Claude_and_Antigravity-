@@ -1,0 +1,21 @@
+{
+  "name": "claude-and-antigravity",
+  "owner": { "name": "Dias Issatayev", "url": "https://github.com/diasissatayev" },
+  "description": "Claude as the conductor of three subscriptions: Gemini (Antigravity, Google AI Pro) for media, research and documents, Codex (ChatGPT Plus) for code, and a zero-token limits band for all three.",
+  "plugins": [
+    {
+      "name": "agy",
+      "source": "./plugins/agy",
+      "description": "Antigravity (Gemini) inside Claude Code: video/audio/images, web research, a local NotebookLM, doc-to-markdown, scraping, design review, recording and delegation, with narrow permissions.",
+      "category": "productivity",
+      "keywords": ["antigravity", "gemini", "media", "research", "notebooklm"]
+    },
+    {
+      "name": "limits",
+      "source": "./plugins/limits",
+      "description": "5-hour and weekly limits of Claude, Codex and Gemini in one band above the prompt, refreshed without spending tokens, plus subscription routing for Claude.",
+      "category": "productivity",
+      "keywords": ["limits", "quota", "codex", "gemini", "usage"]
+    }
+  ]
+}

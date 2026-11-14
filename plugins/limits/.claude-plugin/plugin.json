@@ -1,0 +1,9 @@
+{
+  "name": "limits",
+  "version": "1.0.0",
+  "description": "Limits of all three AI subscriptions in one place — Claude, Codex (ChatGPT Plus) and Gemini (Google AI Pro): 5-hour and weekly windows, connection status, a band above the prompt and a /limits pane. Updates without spending tokens, and tells Claude which subscription to route work to.",
+  "author": { "name": "Dias Issatayev", "url": "https://github.com/diasissatayev" },
+  "license": "MIT",
+  "repository": "https://github.com/diasissatayev/Claude_and_Antigravity-",
+  "types": "./types/index.d.ts"
+}

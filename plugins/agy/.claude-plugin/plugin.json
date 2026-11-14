@@ -1,0 +1,29 @@
+{
+  "name": "agy",
+  "version": "1.0.0",
+  "description": "Antigravity CLI (agy / Gemini) inside Claude Code, on your Google AI Pro subscription: media (audio, video, images), web research, documents, a local NotebookLM, site scraping and design review, plus delegation of bulk work. Merged from yuting0624/antigravity-for-claude-code (engine) and MarcosNahuel/antigravity-plugin-cc (features); Gemini gets narrow permissions, never blanket auto-approve unless asked.",
+  "author": { "name": "Dias Issatayev", "url": "https://github.com/diasissatayev" },
+  "license": "MIT",
+  "repository": "https://github.com/diasissatayev/Claude_and_Antigravity-",
+  "keywords": ["antigravity", "agy", "gemini", "media", "research", "notebooklm", "delegation"],
+  "userConfig": {
+    "default_tier": {
+      "type": "string",
+      "title": "Default Antigravity tier",
+      "description": "flash (default, bulk work), flash-lo (cheapest), pro (hard reasoning, media)",
+      "default": "flash"
+    },
+    "timeout": {
+      "type": "string",
+      "title": "Default delegation timeout",
+      "description": "agy print-mode timeout when --timeout is not passed, e.g. 5m, 10m",
+      "default": "5m"
+    },
+    "default_model": {
+      "type": "string",
+      "title": "Default executor model (exact agy model name)",
+      "description": "Empty uses the tier mapping. Set with /agy:model.",
+      "default": ""
+    }
+  }
+}

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# bin/ entrypoint: configure agy's settings for this plugin (status line + narrow permissions).
+HERE="$(cd "$(dirname "$0")/.." && pwd)"
+. "$HERE/scripts/lib/env.sh"
+exec "$AGY_PY" "$HERE/scripts/agy_setup.py" "$@"

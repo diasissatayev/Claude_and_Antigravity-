@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# bin/ entrypoint on the Bash-tool PATH: run one templated agy task (stage inputs, run, move outputs).
+HERE="$(cd "$(dirname "$0")/.." && pwd)"
+. "$HERE/scripts/lib/env.sh"
+exec "$AGY_PY" "$HERE/scripts/agy_task.py" "$@"

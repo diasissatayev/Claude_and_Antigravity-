@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# bin/ entrypoint: the local NotebookLM tools.
+#   agy-notebook run <folder> "<objective>" [--yes] [--workers N] [--semantic] [--out DIR]
+#   agy-notebook status|audit|graph|embed <outdir>
+#   agy-notebook db <outdir> "<objective>"
+#   agy-notebook stack            (which optional tools are installed)
+HERE="$(cd "$(dirname "$0")/.." && pwd)"
+. "$HERE/scripts/lib/env.sh"
+N="$HERE/scripts/notebook"
+cmd="${1:-}"; shift || true
+case "$cmd" in
+  run)    exec "$AGY_PY" "$N/notebook_run.py" "$@" ;;
+  status) exec "$AGY_PY" "$N/notebook_job.py" status "$@" ;;
+  audit)  exec "$AGY_PY" "$N/notebook_audit.py" "$@" ;;
+  graph)  exec "$AGY_PY" "$N/notebook_graph.py" "$@" ;;
+  embed)  exec "$AGY_PY" "$N/notebook_embed.py" "$@" ;;
+  db)     exec "$AGY_PY" "$N/notebook_db.py" "$@" ;;
+  stack)  exec "$AGY_PY" "$N/stack_check.py" "$@" ;;
+  *) echo "usage: agy-notebook run|status|audit|graph|embed|db|stack ..." >&2; exit 1 ;;
+esac
